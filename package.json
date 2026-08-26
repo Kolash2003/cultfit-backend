@@ -1,17 +1,20 @@
 {
   "name": "expresstypescripttemplate",
+  "type": "module",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "start": "ts-node src/server.ts",
-    "dev": "nodemon src/server.ts"
+    "dev": "nodemon src/server.ts",
+    "contract:emit": "prisma contract emit"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "dotenv": "^16.4.7",
+    "@prisma/orm-postgres": "^8.0.0-rc.8",
+    "dotenv": "^16.6.1",
     "express": "^5.1.0",
     "uuid": "^11.1.0",
     "winston": "^3.17.0",
@@ -19,9 +22,11 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@prisma/cli-engine": "^0.2.3",
     "@types/express": "^5.0.1",
     "@types/node": "^22.14.0",
     "nodemon": "^3.1.9",
+    "prisma": "^8.0.0-rc.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }
