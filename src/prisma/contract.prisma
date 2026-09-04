@@ -1,21 +1,242 @@
 // use prisma-next
 
+enum UserRole {
+  @@type("pg/text@1")
+  USER  = "USER"
+  ADMIN = "ADMIN"
+}
+
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  username  String?
-  name      String?
-  posts     Post[]
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  username     String?
+  name         String?
+  phone        String?     @unique
+  role         UserRole @default(USER)
+  password     String
+  profileImage String?
+  city         String?
+
+  reviews Review[]
+  trainers Trainer[]
+  bookings  Booking[]
+  payments  Payment[]
+
+
   createdAt TimestamptzString @default(now())
   updatedAt temporal.updatedAtString()
 }
 
-model Post {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String?
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  Int
-  createdAt TimestamptzString @default(now())
-  updatedAt temporal.updatedAtString()
+enum TargetType {
+  @@type("pg/text@1")
+  TRAINER = "TRAINER"
+  CENTER  = "CENTER"
+  SESSION = "SESSION"
+  BOOKING = "BOOKING"
+  PAYMENT = "PAYMENT"
 }
+
+model Review {
+  id         Int        @id @default(autoincrement())
+  userId     Int
+  user       User       @relation(fields: [userId], references: [id])
+  targetType TargetType
+  targetId   String     @default(uuid())
+  rating     Int?
+  comment    String?
+
+  createdAt  DateTime   @default(now())
+  updatedAt  temporal.updatedAtString()
+}
+
+model Streak {
+  id                Int       @id   @default(autoincrement())
+  userId            Int
+  user              User      @relation(fields:[userId], references: [id])
+  currentStreak     Int
+  longestStreak     Int
+  lastActivityDate  DateTime  @default(now())
+
+  createdAt         DateTime  @default(now())
+  updatedAt         temporal.updatedAtString()
+}
+
+model Subscription {
+  id              Int     @id @default(autoincrement())
+  userId          Int
+  user            User    @relation(fields: [userId], references: [id])
+  planId          Int     
+  plan            MembershipPlan    @relation(fields: [planId], references: [id])
+  startDate       DateTime
+  endDate         DateTime
+  status          String
+  autoRenew       Boolean
+
+  payments        Payment[]
+
+  createdAt       DateTime    @default(now())
+  updatedAt       temporal.updatedAtString()
+}
+
+model MembershipPlan {
+  id            Int     @id @default(autoincrement())
+  name          String
+  tier          String
+  durationDays  Int
+  price         Decimal
+  features      Json
+  isActive      Boolean
+
+  createdAt     DateTime  @default(now())
+  updatedAt     temporal.updatedAtString()
+}
+
+enum CenterStatus {
+  @@type("pg/text@1")
+  OPEN = "OPEN"
+  CLOSE = "CLOSE"
+  PERMANENTLYCLOSED = "PERMANANTLY CLOSED"
+  SUSPENDED = "SUSPENDED"
+}
+
+model Center {
+  id    Int       @id   @default(autoincrement())
+  name  String    
+  address String  
+  city    String 
+  latitude  Decimal
+  longitude Decimal
+  amenities Json
+  images    Json
+  opeaningHours Json
+  status  CenterStatus
+
+  trainers    Trainer[]
+  classSessions ClassSession[]
+
+  createdAt   DateTime   @default(now())
+  updatedAt    temporal.updatedAtString()
+}
+
+model Trainer {
+  id      Int     @id   @default(autoincrement())
+  userId  Int
+  user    User   @relation(fields: [userId], references: [id])
+  centerId  Int
+  center    Center  @relation(fields: [centerId], references: [id])
+  bio        String?
+  specializations   Json
+  ratingAvg         Decimal
+
+  classSessions   ClassSession[]
+
+  createdAt   DateTime    @default(now())
+  updatedAt   temporal.updatedAtString()
+}
+
+model WorkoutCategory {
+  id      Int     @id     @default(autoincrement())
+  name    String
+  description   String
+  iconUrl       String
+
+  classSessions ClassSession[]
+
+
+  createdAt     DateTime      @default(now())
+  updatedAt     temporal.updatedAtString()
+}
+
+enum SessionMode {
+  @@type("pg/text@1")
+  ONLINE = "ONLINE"
+  OFFLINE = "OFFLINE"
+}
+
+enum ClassSessionMode {
+  @@type("pg/text@1")
+  ACTIVE = "ACTIVE"
+  INACTIVE = "INACTIVE"
+  EXPIRED = "EXPIRED"
+}
+
+model ClassSession {
+  id      Int     @id     @default(autoincrement())
+  centerId    Int
+  center      Center      @relation(fields: [centerId], references: [id])
+  trainerId   Int
+  trainer     Trainer     @relation(fields: [trainerId], references: [id])
+  categoryId  Int
+  category    WorkoutCategory   @relation(fields: [categoryId], references: [id])
+
+  title       String?
+  startTime   DateTime
+  endTime     DateTime
+
+  capacity    Int
+  bookedCount Int
+  mode        SessionMode   @default(OFFLINE)
+
+  meetingLink String
+  status      ClassSessionMode
+
+  bookings    Booking[]
+
+
+  createdAt   DateTime    @default(now())
+  updatedAt   temporal.updatedAtString()
+}
+
+enum BookingStatus {
+  @@type("pg/text@1")
+  BOOKED = "BOOKED"
+  PAYMENTFAILED = "PAYMENT FAILED"
+  BOOKINGPENDING = "BOOKING PENDING"
+}
+
+model Booking {
+  id    Int     @id     @default(autoincrement())
+  userId  Int
+  user    User    @relation(fields:[userId], references: [id])
+  classSessionId    Int
+  classSession    ClassSession @relation(fields: [classSessionId], references: [id])
+
+  status   BookingStatus
+  bookedAt    DateTime
+  cancelledAt DateTime?
+
+  createdAt   DateTime      @default(now())
+  updatedAt   temporal.updatedAtString()
+}
+
+enum Currency {
+  @@type("pg/text@1")
+  INR = "INR"
+}
+
+enum PaymentStatus {
+  @@type("pg/text@1")
+  PENDING = "PENDING"
+  FAILED = "FAILED"
+  SUCCESS = "SUCCESS"
+  CANCELLED = "CANCELLED"
+  REFUNDED = "REFUNDED"
+}
+
+
+model Payment {
+  id    Int    @id     @default(autoincrement())
+  userId  Int
+  user  User   @relation(fields: [userId], references: [id])
+  subscriptionId  Int
+  subscription  Subscription  @relation(fields: [subscriptionId], references: [id])
+
+  amount    Decimal
+  currency  Currency  @default(INR)
+  status    PaymentStatus     @default(PENDING)
+  gatewayReference  String
+
+  createdAt     DateTime  @default(now())
+  updatedAt     temporal.updatedAtString()
+}
+

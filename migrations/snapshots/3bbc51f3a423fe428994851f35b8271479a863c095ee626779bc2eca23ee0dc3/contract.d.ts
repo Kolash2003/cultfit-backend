@@ -33,7 +33,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'da3613f40581ccc151b6b483b3feb25f2c9978c487f79ee1a0b2e2b1aad0308e'>;
+  StorageHashBase<'3bbc51f3a423fe428994851f35b8271479a863c095ee626779bc2eca23ee0dc3'>;
 export type ExecutionHash =
   ExecutionHashBase<'18352a095b34946cbcb8f780d7c2f10819e1005449e33435cd95821b1677d1d9'>;
 export type ProfileHash =
@@ -295,7 +295,7 @@ export type FieldOutputTypes = {
     readonly Payment: {
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly userId: CodecTypes['pg/int4@1']['output'];
-      readonly subscriptionId: CodecTypes['pg/int4@1']['output'];
+      readonly subscriptionId: CodecTypes['pg/text@1']['output'];
       readonly amount: CodecTypes['pg/numeric@1']['output'];
       readonly currency: 'INR';
       readonly status: 'PENDING' | 'FAILED' | 'SUCCESS' | 'CANCELLED' | 'REFUNDED';
@@ -422,7 +422,7 @@ export type FieldInputTypes = {
     readonly Payment: {
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly userId: CodecTypes['pg/int4@1']['input'];
-      readonly subscriptionId: CodecTypes['pg/int4@1']['input'];
+      readonly subscriptionId: CodecTypes['pg/text@1']['input'];
       readonly amount: CodecTypes['pg/numeric@1']['input'];
       readonly currency: 'INR';
       readonly status: 'PENDING' | 'FAILED' | 'SUCCESS' | 'CANCELLED' | 'REFUNDED';
@@ -553,7 +553,7 @@ export type StorageColumnTypes = {
       readonly gatewayReference: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly status: 'PENDING' | 'FAILED' | 'SUCCESS' | 'CANCELLED' | 'REFUNDED';
-      readonly subscriptionId: CodecTypes['pg/int4@1']['output'];
+      readonly subscriptionId: CodecTypes['pg/text@1']['output'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly userId: CodecTypes['pg/int4@1']['output'];
     };
@@ -680,7 +680,7 @@ export type StorageColumnInputTypes = {
       readonly gatewayReference: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly status: 'PENDING' | 'FAILED' | 'SUCCESS' | 'CANCELLED' | 'REFUNDED';
-      readonly subscriptionId: CodecTypes['pg/int4@1']['input'];
+      readonly subscriptionId: CodecTypes['pg/text@1']['input'];
       readonly updatedAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly userId: CodecTypes['pg/int4@1']['input'];
     };
@@ -771,10 +771,7 @@ type ContractBase = Omit<
                   readonly nativeType: 'int4';
                   readonly codecId: 'pg/int4@1';
                   readonly nullable: false;
-                  readonly default: {
-                    readonly kind: 'function';
-                    readonly expression: 'autoincrement()';
-                  };
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
                 };
                 readonly userId: {
                   readonly nativeType: 'int4';
@@ -822,12 +819,6 @@ type ContractBase = Omit<
                   readonly columns: readonly ['userId'];
                   readonly unique: false;
                 },
-                {
-                  readonly name: 'booking_classSessionId_idx_4fd9875e';
-                  readonly prefix: 'booking_classSessionId_idx';
-                  readonly columns: readonly ['classSessionId'];
-                  readonly unique: false;
-                },
               ];
               foreignKeys: readonly [
                 {
@@ -846,7 +837,7 @@ type ContractBase = Omit<
                   readonly source: {
                     readonly namespaceId: 'public' & NamespaceId;
                     readonly tableName: 'booking';
-                    readonly columns: readonly ['classSessionId'];
+                    readonly columns: readonly ['userId'];
                   };
                   readonly target: {
                     readonly namespaceId: 'public' & NamespaceId;
@@ -1147,8 +1138,8 @@ type ContractBase = Omit<
                   readonly nullable: false;
                 };
                 readonly subscriptionId: {
-                  readonly nativeType: 'int4';
-                  readonly codecId: 'pg/int4@1';
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
                   readonly nullable: false;
                 };
                 readonly amount: {
@@ -1806,7 +1797,7 @@ type ContractBase = Omit<
                 };
                 readonly cardinality: 'N:1';
                 readonly on: {
-                  readonly localFields: readonly ['classSessionId'];
+                  readonly localFields: readonly ['userId'];
                   readonly targetFields: readonly ['id'];
                 };
               };
@@ -2014,7 +2005,7 @@ type ContractBase = Omit<
                 readonly cardinality: '1:N';
                 readonly on: {
                   readonly localFields: readonly ['id'];
-                  readonly targetFields: readonly ['classSessionId'];
+                  readonly targetFields: readonly ['userId'];
                 };
               };
               readonly category: {
@@ -2146,7 +2137,7 @@ type ContractBase = Omit<
               };
               readonly subscriptionId: {
                 readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly amount: {
                 readonly nullable: false;
